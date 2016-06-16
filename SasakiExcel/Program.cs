@@ -26,16 +26,15 @@ namespace SasakiExcel {
             if (File.Exists(SaveFileName)) {
                 File.Delete(SaveFileName);
             }
-
+            
             //画像をBitmapで取得
             //Excelファイルを新規作成､開く
             using (var bitmap = new Bitmap(ImageFileName))
             using (var book = new ClosedXML.Excel.XLWorkbook()) {
                 //シートを作成
                 var sheet = book.Worksheets.Add(SheetName);
-                for (var x = 1; x <= bitmap.Width; x++) {
-                    for (var y = 1; y <= bitmap.Height; y++) {
-
+                for (var y = 1; y <= bitmap.Height; y++) {
+                    for (var x = 1; x <= bitmap.Width; x++) {
                         //ピクセルの色を取得
                         var color = bitmap.GetPixel(x - 1, y - 1);
                         //セルの背景色に設定
