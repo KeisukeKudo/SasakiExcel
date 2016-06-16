@@ -33,9 +33,9 @@ namespace SasakiExcel {
             using (var book = new ClosedXML.Excel.XLWorkbook()) {
                 //シートを作成
                 var sheet = book.Worksheets.Add(SheetName);
+                for (var x = 1; x <= bitmap.Width; x++) {
+                    for (var y = 1; y <= bitmap.Height; y++) {
 
-                for (var y = 1; y <= bitmap.Height; y++) {
-                    for (var x = 1; x <= bitmap.Width; x++) {
                         //ピクセルの色を取得
                         var color = bitmap.GetPixel(x - 1, y - 1);
                         //セルの背景色に設定
