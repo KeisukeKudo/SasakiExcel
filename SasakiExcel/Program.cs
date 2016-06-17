@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using System.IO;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
 
@@ -23,17 +24,26 @@ namespace SasakiExcel {
 
 
         static void Main(string[] args) {
-            Console.WriteLine("処理中です.........\r\n");
 
-            try {
-                ImageExcelToCopy();
-                Console.WriteLine("正常終了しました");
-            } catch(Exception e) {
-                Console.WriteLine("異常終了しました");
-                Console.WriteLine(e.Message);
-            } finally {
-                Console.WriteLine("何かキーを入力してください");
+            if (!File.Exists(ImageFileName)) {
+                Console.WriteLine(" {0}が存在しません", ImageFileName);
                 Console.ReadLine();
+                return;
+            }
+            
+            try {
+                Console.WriteLine(" 処理中です.........\r\n");
+                ImageExcelToCopy();
+                Console.WriteLine(" 正常終了しました");
+
+            } catch (Exception e) {
+                Console.WriteLine(" 異常終了しました");
+                Console.WriteLine(e.Message);
+
+            } finally {
+                Console.WriteLine(" 何かキーを入力してください");
+                Console.ReadLine();
+
             }
         }
 
@@ -44,7 +54,7 @@ namespace SasakiExcel {
             DeleteFile();
 
             //Excelファイル作成
-            var outputFile = new System.IO.FileInfo(ExcelFileName);
+            var outputFile = new FileInfo(ExcelFileName);
 
             //画像をBitmapで取得
             //Excelファイルを開く
@@ -90,8 +100,8 @@ namespace SasakiExcel {
         /// 既にファイルが存在している場合は削除
         /// </summary>
         static void DeleteFile() {
-            if (System.IO.File.Exists(ExcelFileName)) {
-                System.IO.File.Delete(ExcelFileName);
+            if (File.Exists(ExcelFileName)) {
+                File.Delete(ExcelFileName);
             }
         }
 
