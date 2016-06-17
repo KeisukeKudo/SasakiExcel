@@ -1,6 +1,7 @@
-﻿using System.Drawing;
-using System.IO;
-using ClosedXML.Excel;
+﻿using System;
+using System.Drawing;
+using OfficeOpenXml;
+using OfficeOpenXml.Style;
 
 namespace SasakiExcel {
     class Program {
@@ -13,7 +14,7 @@ namespace SasakiExcel {
         /// <summary>
         /// 保存Excelファイル名
         /// </summary>
-        private const string SaveFileName = "sasaki_nozomi.xlsx";
+        private const string ExcelFileName = "sasaki_nozomi.xlsx";
 
         /// <summary>
         /// Excelシート名
@@ -22,36 +23,77 @@ namespace SasakiExcel {
 
 
         static void Main(string[] args) {
-            //あったら消す
-            if (File.Exists(SaveFileName)) {
-                File.Delete(SaveFileName);
+            Console.WriteLine("処理中です.........\r\n");
+
+            try {
+                ImageExcelToCopy();
+                Console.WriteLine("正常終了しました");
+            } catch(Exception e) {
+                Console.WriteLine("異常終了しました｡");
+                Console.WriteLine(e.Message);
+            } finally {
+                Console.WriteLine("何かキーを入力してください");
+                Console.ReadLine();
             }
-            
+        }
+
+        /// <summary>
+        /// 対象画像のピクセルから色を取得し､Excelシートの各セルに設定､保存
+        /// </summary>
+        static void ImageExcelToCopy() {
+            DeleteFile();
+
+            //Excelファイル作成
+            var outputFile = new System.IO.FileInfo(ExcelFileName);
+
             //画像をBitmapで取得
-            //Excelファイルを新規作成､開く
+            //Excelファイルを開く
             using (var bitmap = new Bitmap(ImageFileName))
-            using (var book = new ClosedXML.Excel.XLWorkbook()) {
+            using (var book = new ExcelPackage(outputFile)) {
                 //回転情報が無いのに回転してしまうので正しい位置に調整
                 //時計回りに90度回転し､水平方向に反転
                 bitmap.RotateFlip(RotateFlipType.Rotate90FlipX);
-                
+
                 //シートを作成
-                var sheet = book.Worksheets.Add(SheetName);
+                var sheet = book.Workbook.Worksheets.Add(SheetName);
                 for (var y = 1; y <= bitmap.Height; y++) {
+                    //高さ指定
+                    sheet.Row(y).Height = 3.8;
                     for (var x = 1; x <= bitmap.Width; x++) {
                         //ピクセルの色を取得
                         var color = bitmap.GetPixel(x - 1, y - 1);
                         //セルの背景色に設定
-                        sheet.Cell(x, y).Style.Fill.SetBackgroundColor(XLColor.FromColor(color));
+                        var cell = sheet.Cells[x, y];
+                        SetBackgroundColor(cell, color);
+
+                        //横幅指定
+                        sheet.Column(x).Width = 0.7;
                     }
                 }
-                //高さ指定
-                sheet.Rows(1, bitmap.Height).Height = 3.8;
-                //横幅指定(効いてない?)
-                sheet.Columns(1, bitmap.Width).Width = 0.1;
-                //ルートに保存
-                book.SaveAs(SaveFileName);
+                //ズームレベルの指定(25%)
+                sheet.View.ZoomScale = 25;
+                book.Save();
             }
         }
+
+        /// <summary>
+        /// セルの背景色を設定
+        /// </summary>
+        /// <param name="cell"></param>
+        /// <param name="color"></param>
+        static void SetBackgroundColor(ExcelRange cell, Color color) {
+            cell.Style.Fill.PatternType = ExcelFillStyle.Solid;
+            cell.Style.Fill.BackgroundColor.SetColor(color);
+        }
+
+        /// <summary>
+        /// 既にファイルが存在している場合は削除
+        /// </summary>
+        static void DeleteFile() {
+            if (System.IO.File.Exists(ExcelFileName)) {
+                System.IO.File.Delete(ExcelFileName);
+            }
+        }
+
     }
 }
