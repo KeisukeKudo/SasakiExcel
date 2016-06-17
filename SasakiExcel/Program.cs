@@ -31,6 +31,10 @@ namespace SasakiExcel {
             //Excelファイルを新規作成､開く
             using (var bitmap = new Bitmap(ImageFileName))
             using (var book = new ClosedXML.Excel.XLWorkbook()) {
+                //回転情報が無いのに回転してしまうので正しい位置に調整
+                //時計回りに90度回転し､水平方向に反転
+                bitmap.RotateFlip(RotateFlipType.Rotate90FlipX);
+                
                 //シートを作成
                 var sheet = book.Worksheets.Add(SheetName);
                 for (var y = 1; y <= bitmap.Height; y++) {
