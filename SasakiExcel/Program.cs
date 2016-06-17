@@ -29,7 +29,7 @@ namespace SasakiExcel {
                 ImageExcelToCopy();
                 Console.WriteLine("正常終了しました");
             } catch(Exception e) {
-                Console.WriteLine("異常終了しました｡");
+                Console.WriteLine("異常終了しました");
                 Console.WriteLine(e.Message);
             } finally {
                 Console.WriteLine("何かキーを入力してください");
