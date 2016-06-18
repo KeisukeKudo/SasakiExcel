@@ -27,25 +27,31 @@ namespace SasakiExcel {
         static void Main(string[] args) {
 
             if (!File.Exists(ImageFileName)) {
-                Console.WriteLine(" {0}が存在しません", ImageFileName);
+                Console.WriteLine("{0}が存在しません", ImageFileName);
                 Console.ReadLine();
                 return;
             }
 
             try {
+                //Excelがインストールされていない場合は､以降の処理を続行するか聞く
+                if (!IsExcelInstalled() && !IsProceed()) {
+                    Console.WriteLine("処理を中断しました");
+                    return;
+                }
+
                 var s = new Stopwatch();
                 s.Start();
-                Console.WriteLine(" 処理中です.........\r\n");
+                Console.WriteLine("処理中です.........\r\n");
                 ImageExcelToCopy();
                 s.Stop();
-                Console.WriteLine(" 正常終了しました({0:N0}ms)", s.ElapsedMilliseconds);
+                Console.WriteLine("正常終了しました({0:N0}ms)", s.ElapsedMilliseconds);
 
             } catch (Exception e) {
-                Console.WriteLine(" 異常終了しました");
+                Console.WriteLine("異常終了しました");
                 Console.WriteLine(e.Message);
 
             } finally {
-                Console.WriteLine(" 何かキーを入力してください");
+                Console.WriteLine("何かキーを入力してください");
                 Console.ReadLine();
 
             }
@@ -61,10 +67,10 @@ namespace SasakiExcel {
 
             //Excelファイル作成
             var outputFile = new FileInfo(ExcelFileName);
-            
+
             using (var bitmap = new Bitmap(ImageFileName))
             using (var book = new ExcelPackage(outputFile))
-            using (var sheet = book.Workbook.Worksheets.Add(SheetName)) { 
+            using (var sheet = book.Workbook.Worksheets.Add(SheetName)) {
                 //回転情報が無いのに回転してしまうので正しい位置に調整
                 //時計回りに90度回転し､水平方向に反転
                 bitmap.RotateFlip(RotateFlipType.Rotate90FlipX);
@@ -96,6 +102,34 @@ namespace SasakiExcel {
         static void SetBackgroundColor(ExcelRange cell, Color color) {
             cell.Style.Fill.PatternType = ExcelFillStyle.Solid;
             cell.Style.Fill.BackgroundColor.SetColor(color);
+        }
+
+        /// <summary>
+        /// 実行環境にExcelがインストールされているか
+        /// </summary>
+        /// <returns></returns>
+        static bool IsExcelInstalled() {
+            return (Type.GetTypeFromProgID("Excel.Application") != null);
+        }
+
+        /// <summary>
+        /// Excelがインストールされていない場合､処理を続行するか選択
+        /// </summary>
+        /// <returns></returns>
+        static bool IsProceed() {
+            Console.WriteLine("Excelがインストールされていません");
+            Console.WriteLine("出力ファイルを閲覧できませんが､処理を続行しますか? Y/N");
+            var response = Console.ReadLine().ToUpper();
+            while (true) {
+                switch (response) {
+                    case "Y":
+                        return true;
+                    case "N":
+                        return false;
+                }
+                //上記以外が入力された場合は再度入力を求める
+                response = Console.ReadLine().ToUpper();
+            }
         }
     }
 }
